@@ -37,6 +37,7 @@ body, html {
 
 .bgimg {
 	background-image: url('/images/backgroundv3.png');
+	background-color: #999999;
 	min-height: 100%;
 	background-position: center;
 	background-size: cover;

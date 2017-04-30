@@ -23,6 +23,14 @@ div#contact {
 	text-align: center;
 }
 
+div#maincontent {
+	max-width: 1000px;
+	margin: auto;
+	left: 1%;
+	right: 1%;
+	position: absolute;
+}
+
 .links:hover {
 	box-shadow: 2px 2px #1f1f1f;
 }
@@ -37,7 +45,6 @@ body, html {
 
 .bgimg {
 	background-image: url('/images/backgroundv3.png');
-	background-color: #999999;
 	min-height: 100%;
 	background-position: center;
 	background-size: cover;

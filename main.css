@@ -41,7 +41,7 @@ body, html {
 	right: 0;
 }
 
-#canvas {
+#indexcanvas {
 	z-index: -1;
 	background: transparent;
 	position: absolute;

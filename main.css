@@ -43,7 +43,6 @@ body, html {
 
 #indexcanvas {
 	z-index: -1;
-	background: transparent;
 	position: absolute;
 	left: 0px;
 	right: 0px;

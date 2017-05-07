@@ -11,7 +11,7 @@ function Ball(r, p, v) {
 	this.sidePoints = [];
 	this.path = new Path({
 		fillColor: {
-			hue: '#2c2c2c',
+			hue: '#2d2d2d',
 			saturation: 0,
 			brightness: 0.03
 		},
@@ -113,7 +113,7 @@ Ball.prototype = {
 //--------------------- main ---------------------
 
 var balls = [];
-var numBalls = 10;
+var numBalls = 5;
 for (var i = 0; i < numBalls; i++) {
 	var position = Point.random() * view.size;
 	var vector = new Point({

@@ -1,121 +1,136 @@
-// Adapted from paperjs.org
+// kynd.info 2014
 
-var voronoi =  new Voronoi();
-var sites = generateBeeHivePoints(view.size / 200, true);
-var bbox, diagram;
-var oldSize = view.size;
-var spotColor = new Color('#2c2c2c');
-var mousePos = view.center;
-var selected = false;
+function Ball(r, p, v) {
+	this.radius = r;
+	this.point = p;
+	this.vector = v;
+	this.maxVec = 15;
+	this.numSegment = Math.floor(r / 3 + 2);
+	this.boundOffset = [];
+	this.boundOffsetBuff = [];
+	this.sidePoints = [];
+	this.path = new Path({
+		fillColor: {
+			hue: '#2c2c2c',
+			saturation: 0,
+			brightness: 0.03
+		},
+		//blendMode: 'lighter'
+	});
 
-onResize();
-
-function onMouseDown(event) {
-	sites.push(event.point);
-	renderDiagram();
+	for (var i = 0; i < this.numSegment; i ++) {
+		this.boundOffset.push(this.radius);
+		this.boundOffsetBuff.push(this.radius);
+		this.path.add(new Point());
+		this.sidePoints.push(new Point({
+			angle: 360 / this.numSegment * i,
+			length: 1
+		}));
+	}
 }
 
-function onMouseMove(event) {
-	mousePos = event.point;
-	if (event.count == 0)
-		sites.push(event.point);
-	sites[sites.length - 1] = event.point;
-	renderDiagram();
-}
+Ball.prototype = {
+	iterate: function() {
+		this.checkBorders();
+		if (this.vector.length > this.maxVec)
+			this.vector.length = this.maxVec;
+		this.point += this.vector;
+		this.updateShape();
+	},
 
-function renderDiagram() {
-	project.activeLayer.children = [];
-	var diagram = voronoi.compute(sites, bbox);
-	if (diagram) {
-		for (var i = 0, l = sites.length; i < l; i++) {
-			var cell = diagram.cells[sites[i].voronoiId];
-			if (cell) {
-				var halfedges = cell.halfedges,
-					length = halfedges.length;
-				if (length > 2) {
-					var points = [];
-					for (var j = 0; j < length; j++) {
-						v = halfedges[j].getEndpoint();
-						points.push(new Point(v));
-					}
-					createPath(points, sites[i]);
-				}
+	checkBorders: function() {
+		var size = view.size;
+		if (this.point.x < -this.radius)
+			this.point.x = size.width + this.radius;
+		if (this.point.x > size.width + this.radius)
+			this.point.x = -this.radius;
+		if (this.point.y < -this.radius)
+			this.point.y = size.height + this.radius;
+		if (this.point.y > size.height + this.radius)
+			this.point.y = -this.radius;
+	},
+
+	updateShape: function() {
+		var segments = this.path.segments;
+		for (var i = 0; i < this.numSegment; i ++)
+			segments[i].point = this.getSidePoint(i);
+
+		this.path.smooth();
+		for (var i = 0; i < this.numSegment; i ++) {
+			if (this.boundOffset[i] < this.radius / 4)
+				this.boundOffset[i] = this.radius / 4;
+			var next = (i + 1) % this.numSegment;
+			var prev = (i > 0) ? i - 1 : this.numSegment - 1;
+			var offset = this.boundOffset[i];
+			offset += (this.radius - offset) / 15;
+			offset += ((this.boundOffset[next] + this.boundOffset[prev]) / 2 - offset) / 3;
+			this.boundOffsetBuff[i] = this.boundOffset[i] = offset;
+		}
+	},
+
+	react: function(b) {
+		var dist = this.point.getDistance(b.point);
+		if (dist < this.radius + b.radius && dist != 0) {
+			var overlap = this.radius + b.radius - dist;
+			var direc = (this.point - b.point).normalize(overlap * 0.015);
+			this.vector += direc;
+			b.vector -= direc;
+
+			this.calcBounds(b);
+			b.calcBounds(this);
+			this.updateBounds();
+			b.updateBounds();
+		}
+	},
+
+	getBoundOffset: function(b) {
+		var diff = this.point - b;
+		var angle = (diff.angle + 180) % 360;
+		return this.boundOffset[Math.floor(angle / 360 * this.boundOffset.length)];
+	},
+
+	calcBounds: function(b) {
+		for (var i = 0; i < this.numSegment; i ++) {
+			var tp = this.getSidePoint(i);
+			var bLen = b.getBoundOffset(tp);
+			var td = tp.getDistance(b.point);
+			if (td < bLen) {
+				this.boundOffsetBuff[i] -= (bLen  - td) / 2;
 			}
 		}
+	},
+
+	getSidePoint: function(index) {
+		return this.point + this.sidePoints[index] * this.boundOffset[index];
+	},
+
+	updateBounds: function() {
+		for (var i = 0; i < this.numSegment; i ++)
+			this.boundOffset[i] = this.boundOffsetBuff[i];
 	}
+};
+
+//--------------------- main ---------------------
+
+var balls = [];
+var numBalls = 10;
+for (var i = 0; i < numBalls; i++) {
+	var position = Point.random() * view.size;
+	var vector = new Point({
+		angle: 360 * Math.random(),
+		length: Math.random() * 10
+	});
+	var radius = Math.random() * 60 + 60;
+	balls.push(new Ball(radius, position, vector));
 }
 
-function removeSmallBits(path) {
-	var averageLength = path.length / path.segments.length;
-	var min = path.length / 50;
-	for(var i = path.segments.length - 1; i >= 0; i--) {
-		var segment = path.segments[i];
-		var cur = segment.point;
-		var nextSegment = segment.next;
-		var next = nextSegment.point + nextSegment.handleIn;
-		if (cur.getDistance(next) < min) {
-			segment.remove();
+function onFrame() {
+	for (var i = 0; i < balls.length - 1; i++) {
+		for (var j = i + 1; j < balls.length; j++) {
+			balls[i].react(balls[j]);
 		}
 	}
-}
-
-function generateBeeHivePoints(size, loose) {
-	var points = [];
-	var col = view.size / size;
-	for(var i = -1; i < size.width + 1; i++) {
-		for(var j = -1; j < size.height + 1; j++) {
-			var point = new Point(i, j) / new Point(size) * view.size + col / 2;
-			if(j % 2)
-				point += new Point(col.width / 2, 0);
-			if(loose)
-				point += (col / 4) * Point.random() - col / 4;
-			points.push(point);
-		}
-	}
-	return points;
-}
-function createPath(points, center) {
-	var path = new Path();
-	if (!selected) {
-		path.fillColor = spotColor;
-	} else {
-		path.fullySelected = selected;
-	}
-	path.closed = true;
-
-	for (var i = 0, l = points.length; i < l; i++) {
-		var point = points[i];
-		var next = points[(i + 1) == points.length ? 0 : i + 1];
-		var vector = (next - point) / 2;
-		path.add({
-			point: point + vector,
-			handleIn: -vector,
-			handleOut: vector
-		});
-	}
-	path.scale(0.95);
-	removeSmallBits(path);
-	return path;
-}
-
-function onResize() {
-	var margin = 20;
-	bbox = {
-		xl: margin,
-		xr: view.bounds.width - margin,
-		yt: margin,
-		yb: view.bounds.height - margin
-	};
-	for (var i = 0, l = sites.length; i < l; i++) {
-		sites[i] = sites[i] * view.size / oldSize;
-	}
-	oldSize = view.size;
-	renderDiagram();
-}
-
-function onKeyDown(event) {
-	if (event.key == 'space') {
-		selected = !selected;
-		renderDiagram();
+	for (var i = 0, l = balls.length; i < l; i++) {
+		balls[i].iterate();
 	}
 }

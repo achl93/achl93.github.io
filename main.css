@@ -26,7 +26,7 @@ h1 {
 
 body, html {
 	height: 100%;
-	background-color: #303030;
+	background-color: transparent;
 }
 
 .container {
@@ -43,6 +43,7 @@ body, html {
 
 #indexcanvas {
 	z-index: -1;
+	background: #303030;
 	position: absolute;
 	left: 0px;
 	right: 0px;

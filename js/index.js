@@ -9,14 +9,8 @@ function Ball(r, p, v) {
 	this.boundOffset = [];
 	this.boundOffsetBuff = [];
 	this.sidePoints = [];
-	this.path = new Path({
-		fillColor: {
-			hue: '#2d2d2d',
-			saturation: 0,
-			brightness: 0.03
-		},
-		//blendMode: 'lighter'
-	});
+	this.path = new Path;
+    this.path.fillColor = '#2d2d2d';
 
 	for (var i = 0; i < this.numSegment; i ++) {
 		this.boundOffset.push(this.radius);

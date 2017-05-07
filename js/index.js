@@ -123,8 +123,6 @@ function onFrame(event) {
 	for (var i = 0; i < balls.length - 1; i++) {
 		for (var j = i + 1; j < balls.length; j++) {
 			balls[i].react(balls[j]);
-            balls[i].this.path.fillColor.hue += 0.1;
-            balls[j].this.path.fillColor.hue -= 0.1;
 		}
 	}
 	for (var i = 0, l = balls.length; i < l; i++) {

@@ -1,4 +1,5 @@
 // kynd.info 2014
+// modified by achl93
 
 function Ball(r, p, v) {
 	this.radius = r;
@@ -118,7 +119,7 @@ for (var i = 0; i < numBalls; i++) {
 	balls.push(new Ball(radius, position, vector));
 }
 
-function onFrame() {
+function onFrame(event) {
 	for (var i = 0; i < balls.length - 1; i++) {
 		for (var j = i + 1; j < balls.length; j++) {
 			balls[i].react(balls[j]);
@@ -127,4 +128,6 @@ function onFrame() {
 	for (var i = 0, l = balls.length; i < l; i++) {
 		balls[i].iterate();
 	}
+    Ball.path.fillColor.hue += 0.1;
+    if (Ball.path.fillColor.hue >= 0.1) Ball.path.fillColor.hue = 0;
 }

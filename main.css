@@ -62,12 +62,16 @@ html {
 	height: 100%;
 }
 
+a {
+	color: grey;
+}
+
 .fa-envelope {
 	color: grey;
-	height: 32px;
+	font-size: 32px;
 }
 
 .fa-envelope:hover {
 	color: white;
-	height: 32px;
+	font-size: 32px;
 }

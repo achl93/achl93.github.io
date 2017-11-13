@@ -66,6 +66,10 @@ a {
 	color: grey;
 }
 
+a::before {
+	content: '';
+}
+
 .fa-envelope {
 	color: grey;
 	font-size: 32px;
@@ -74,4 +78,5 @@ a {
 .fa-envelope:hover {
 	color: white;
 	font-size: 32px;
+	transition: all 0.5s ease;
 }

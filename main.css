@@ -61,3 +61,11 @@ html {
 	width: 100%;
 	height: 100%;
 }
+
+.fa-envelope {
+	color: grey;
+}
+
+.fa-envelope:hover {
+	color: white;
+}

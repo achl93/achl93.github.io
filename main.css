@@ -64,8 +64,10 @@ html {
 
 .fa-envelope {
 	color: grey;
+	height: 32px;
 }
 
 .fa-envelope:hover {
 	color: white;
+	height: 32px;
 }
